@@ -1,19 +1,41 @@
-def executeShellCommand(command) {
-    def process = command.execute()
-    process.waitForProcessOutput(System.out, System.err)
-    return process.exitValue()
+def call(Closure body){
+     def config = [:]
+     body.resolveStrategy = Closure.DELEGATE_FIRST
+     body.delegate = config
+     body()
+     
+pipeline {
+    agent any
+
+    stages {
+        stage('AWS Example') {
+            steps {
+                // Retrieve AWS credentials from Jenkins credentials store
+                withCredentials([[
+                    $class: 'AmazonWebServicesCredentialsBinding',
+                    accessKeyVariable: 'AWS_ACCESS_KEY_ID',
+                    secretKeyVariable: 'AWS_SECRET_ACCESS_KEY',
+                    credentialsId: 'jenkins-user'
+                ]]) {
+                    // Now you can use the AWS credentials in your steps
+                    // For example, using AWS CLI with Python
+                    sh 'pip install awscli' // Install AWS CLI for Python
+                    sh 'aws ec2 describe-instances --region us-east-1' // Example AWS CLI command
+                }
+            }
+        }
+
+        stage('Terraform CI') {
+            steps {
+                script {
+                    def action = "init"
+                    //def command = "python3 terraform_ci.py ${action}"
+                    sh "python3 terraform_ci.py ${action}"
+
+                }
+            }
+        }
+    }
+}
 }
 
-// Call the Python script with the desired action ("init", "fmt", or "plan")
-def action = "init"
-def command = "python3 terraform_ci.py ${action}"
-
-def exitCode = executeShellCommand(command)
-
-// Check the exit code and handle errors if necessary
-if (exitCode != 0) {
-    println "Error: Terraform CI failed with exit code ${exitCode}"
-    System.exit(exitCode)
-} else {
-    println "Terraform CI executed successfully."
-}
