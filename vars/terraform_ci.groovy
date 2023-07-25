@@ -35,6 +35,7 @@ pipeline {
                       println 'content'
                       writeFile file: 'output.py' , text: content
                       sh "python3 output.py init"
+                      sh "python3 output.py fmt"
 
                 }
             }
