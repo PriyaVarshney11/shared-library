@@ -30,7 +30,8 @@ pipeline {
                 script {
                     def action = "init"
                     //def command = "python3 terraform_ci.py ${action}"
-                    sh "python3 terraform_ci.py ${action}"
+                    sh "python3 $WORKSPACE/resources/terraform_ci.py ${action}"
+                     
 
                 }
             }
