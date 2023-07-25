@@ -31,7 +31,7 @@ pipeline {
                     //def action = "init"
                     //def command = "python3 terraform_ci.py ${action}"
                     //sh "python3 $WORKSPACE/resources/terraform_ci.py ${action}"
-                      def content = readFileFromResources('terraform_ci.py')
+                      def content = libraryResource('terraform_ci.py')
                       println 'content'
                       writeFile file: 'output.py' , text: content
                       sh "python3 output.py init"
